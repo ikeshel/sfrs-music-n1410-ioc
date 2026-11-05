@@ -1,0 +1,21 @@
+# EPICS generated build output
+**/O.*
+/bin/
+/dbd/
+/lib/
+/include/
+/html/
+/cfg/
+/iocBoot/*/envPaths
+
+# Temporary files
+*.log
+*.swp
+*~
+core
+core.*
+
+.iocsh_history
+
+/db/
+__pycache__/

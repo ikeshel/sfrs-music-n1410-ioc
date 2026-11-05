@@ -1,0 +1,77 @@
+# CAEN N1410 / N14xx ASCII protocol for StreamDevice.
+# Arguments: $1 = two-digit board address (00..31), $2 = channel (0..3).
+# CR LF framing is a commissioning assumption; see README.md.
+Terminator = CR LF;
+ReplyTimeout = 2000;
+ReadTimeout = 2000;
+WriteTimeout = 2000;
+LockTimeout = 10000;
+ExtraInput = Error;
+
+setEnable {
+    out 0x24 "BD:\$1,CMD:SET,CH:\$2,PAR:%{OFF|ON}";
+    in "#BD:\$1,CMD:OK";
+}
+
+getVMon {
+    out 0x24 "BD:\$1,CMD:MON,CH:\$2,PAR:VMON";
+    in "#BD:\$1,CMD:OK,VAL:%f";
+}
+
+getIMon {
+    out 0x24 "BD:\$1,CMD:MON,CH:\$2,PAR:IMON";
+    in "#BD:\$1,CMD:OK,VAL:%f";
+}
+
+getStatus {
+    out 0x24 "BD:\$1,CMD:MON,CH:\$2,PAR:STAT";
+    in "#BD:\$1,CMD:OK,VAL:%d";
+}
+
+setVSet {
+    out 0x24 "BD:\$1,CMD:SET,CH:\$2,PAR:VSET,VAL:%.2f";
+    in "#BD:\$1,CMD:OK";
+    out 0x24 "BD:\$1,CMD:MON,CH:\$2,PAR:VSET";
+    in "#BD:\$1,CMD:OK,VAL:%f";
+
+    @init {
+        out 0x24 "BD:\$1,CMD:MON,CH:\$2,PAR:VSET";
+    in "#BD:\$1,CMD:OK,VAL:%f";
+    }
+}
+
+setISet {
+    out 0x24 "BD:\$1,CMD:SET,CH:\$2,PAR:ISET,VAL:%.3f";
+    in "#BD:\$1,CMD:OK";
+    out 0x24 "BD:\$1,CMD:MON,CH:\$2,PAR:ISET";
+    in "#BD:\$1,CMD:OK,VAL:%f";
+
+    @init {
+        out 0x24 "BD:\$1,CMD:MON,CH:\$2,PAR:ISET";
+    in "#BD:\$1,CMD:OK,VAL:%f";
+    }
+}
+
+setRampUp {
+    out 0x24 "BD:\$1,CMD:SET,CH:\$2,PAR:RUP,VAL:%.0f";
+    in "#BD:\$1,CMD:OK";
+    out 0x24 "BD:\$1,CMD:MON,CH:\$2,PAR:RUP";
+    in "#BD:\$1,CMD:OK,VAL:%f";
+
+    @init {
+        out 0x24 "BD:\$1,CMD:MON,CH:\$2,PAR:RUP";
+    in "#BD:\$1,CMD:OK,VAL:%f";
+    }
+}
+
+setRampDown {
+    out 0x24 "BD:\$1,CMD:SET,CH:\$2,PAR:RDW,VAL:%.0f";
+    in "#BD:\$1,CMD:OK";
+    out 0x24 "BD:\$1,CMD:MON,CH:\$2,PAR:RDW";
+    in "#BD:\$1,CMD:OK,VAL:%f";
+
+    @init {
+        out 0x24 "BD:\$1,CMD:MON,CH:\$2,PAR:RDW";
+    in "#BD:\$1,CMD:OK,VAL:%f";
+    }
+}

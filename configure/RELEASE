@@ -1,0 +1,4 @@
+# Override these dependency paths here or on the make command line.
+ASYN = $(TOP)/../../support/asyn
+STREAM = $(TOP)/../../support/StreamDevice
+EPICS_BASE = $(TOP)/../../base-7.0.10
