@@ -52,11 +52,11 @@ added to a substitutions file. The template supports all four hardware channels.
 ```bash
 PV_LOCATION=FHF1 \
 CAEN_DEVICE=/dev/serial/by-id/YOUR_N1410_DEVICE \
-HV_V_SET_MAX=1000 HV_I_SET_MAX=120 ./run.sh
+HV_V_SET_MAX=500 HV_I_SET_MAX=120 ./run.sh
 ```
 
-Choose the correct device with `ls -l /dev/serial/by-id/`. The fallback is
-`/dev/ttyUSB0`; the old NDT1470 USB identifier is not assumed to identify an
+Choose the correct device with `ls -l /dev/serial/by-id/`. The default for the supplied installation is
+`/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_AB0OC33S-if00-port0`; the old NDT1470 USB identifier is not assumed to identify an
 N1410. The account needs read/write access (normally membership in `dialout`).
 Stop other serial clients before starting this IOC.
 
@@ -68,16 +68,16 @@ overrides:
 | `PV_LOCATION` | Selected by hostname in run.sh; FHF1 in direct startup |
 | `MUSIC_PREFIX` | `SFRS:<PV_LOCATION>:MUSIC1:` |
 | `MUSIC_SUBSTITUTIONS` | `db/music_hv_<PV_LOCATION>.substitutions` |
-| `CAEN_DEVICE` | `/dev/ttyUSB0` |
+| `CAEN_DEVICE` | `/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_AB0OC33S-if00-port0` |
 | `CAEN_PORT` | `MUSIC_N1410` |
 | `CAEN_BD` | `00` (two digits, 00–31) |
 | `CAEN_BAUD` | `9600`; 8N1, XON/XOFF |
-| `HV_V_SET_MAX` | `1000` V |
+| `HV_V_SET_MAX` | `500` V (positive operating limit) |
 | `HV_I_SET_MAX` | `200` µA; lower to ≤20 with Imon Zoom |
 | `EPICS_CAS_SERVER_PORT` | `5064` |
 
 Set voltage/current limits to the approved detector operating envelope. The
-launcher rejects limits above the model maxima, invalid addresses and missing
+launcher rejects voltage limits above 500 V and current limits above 200 µA, invalid addresses and missing
 devices. Direct startup bypasses launcher validation:
 
 ```bash
@@ -91,24 +91,25 @@ does not turn off hardware outputs.
 
 ## PV interface
 
-Names are `<MUSIC_PREFIX>FC<n>:<suffix>`:
+Names are `<MUSIC_PREFIX>FC<n>:<suffix>` (including the `PHV:` subsystem below):
 
 | Suffix | Function |
 |---|---|
-| `HV_V_SET` | Voltage magnitude setpoint, 0–configured maximum V |
-| `HV_V_RBV` | Measured voltage, V |
-| `HV_I_SET` | Current limit, 0–configured maximum µA |
-| `HV_I_RBV` | Measured current, µA (four displayed decimals) |
-| `HV_RAMP_UP_SET` | Ramp-up rate, 1–100 V/s |
-| `HV_RAMP_DOWN_SET` | Ramp-down rate, 1–100 V/s |
-| `HV_ENABLE` | Write 0 for OFF, 1 for ON |
-| `HV_STATUS` | Raw decimal status mask, sampled once per second |
+| `PHV:V_SET` | Voltage magnitude setpoint, 0–configured maximum V |
+| `PHV:V_RBV` | Measured voltage, V |
+| `PHV:I_SET` | Current limit, 0–configured maximum µA |
+| `PHV:I_RBV` | Measured current, µA (four displayed decimals) |
+| `PHV:RAMP_UP_SET` | Ramp-up rate, 1–100 V/s |
+| `PHV:RAMP_DOWN_SET` | Ramp-down rate, 1–100 V/s |
+| `PHV:ENABLE` | Write 0 for OFF, 1 for ON |
+| `PHV:STATUS` | Raw decimal status mask, sampled once per second |
 
-`HV_STATE` and `HV_STAT` alias `HV_STATUS`. For reference compatibility,
-`HV_ENABL`, `HV_ON_OFF`, `HV_ON` and `HV_OFF` all alias `HV_ENABLE`.
-**Every enable alias uses the written value: writing 1 to `HV_OFF` turns ON.**
-Prefer the unambiguous `HV_ENABLE` name. Its value represents the last command,
-not actual channel state; inspect `HV_STATUS` for hardware state.
+Every canonical record has a readable alias, for example
+`FC1:PHV:V_SET` and `FC1:POSITIVE:V_SET` access the same record.
+The same mapping applies to all eight suffixes above. Use `PHV` in displays
+and scripts. Legacy `HV_*` names and ambiguous ON/OFF aliases are removed.
+`PHV:ENABLE` is the last command, not actual channel state; inspect
+`PHV:STATUS` for hardware state.
 
 All output records have `PINI=NO`. StreamDevice initialization queries voltage,
 current and both ramp setpoints; it never sends SET or ON/OFF at startup.
@@ -119,11 +120,11 @@ No autosave or automatic startup ramp defaults are applied.
 
 ```bash
 PV_LOCATION=FHF1 scripts/monitor_HV.sh
-caget SFRS:FHF1:MUSIC1:FC1:HV_V_SET.SEVR
+caget SFRS:FHF1:MUSIC1:FC1:PHV:V_SET.SEVR
 # Only after checking wiring, polarity, interlock and approved limits:
-caput SFRS:FHF1:MUSIC1:FC1:HV_V_SET 10
-caput SFRS:FHF1:MUSIC1:FC1:HV_ENABLE 1
-caput SFRS:FHF1:MUSIC1:FC1:HV_ENABLE 0
+caput SFRS:FHF1:MUSIC1:FC1:PHV:V_SET 10
+caput SFRS:FHF1:MUSIC1:FC1:PHV:ENABLE 1
+caput SFRS:FHF1:MUSIC1:FC1:PHV:ENABLE 0
 ```
 
 A voltage write while ON changes the output immediately via the configured ramp.
@@ -153,3 +154,17 @@ and localhost Channel Access on port 15064. It checks both channel mappings,
 read-only initialization, setpoint formatting, limit clamping, ON/OFF commands
 and rejected-write alarms. It requires permission to open localhost sockets.
 No physical N1410 was used for these tests.
+
+## Polarity naming migration
+
+Canonical PVs use `FC<n>:PHV:<parameter>`; every record also has a
+`FC<n>:POSITIVE:<parameter>` alias. Parameters are `V_SET`, `V_RBV`,
+`I_SET`, `I_RBV`, `RAMP_UP_SET`, `RAMP_DOWN_SET`, `ENABLE` and `STATUS`.
+For example, `SFRS:FHF1:MUSIC1:FC1:POSITIVE:V_RBV` is the same record
+as `SFRS:FHF1:MUSIC1:FC1:PHV:V_RBV`.
+
+Update clients from `FC1:HV_V_RBV` to `FC1:PHV:V_RBV` and from
+`FC1:HV_STATE` to `FC1:PHV:STATUS`. Old `HV_*` aliases are not provided,
+so the positive and negative IOCs can share the MUSIC prefix without collisions.
+Rebuild and restart both IOCs to load the new names. This naming change does
+not alter hardware polarity or the protocol's voltage sign convention.

@@ -63,18 +63,19 @@ def check_location(location, channels):
                                   ('ENABLE', '1'), ('ENABLE', '0'),
                                   ('V_SET', '1500'), ('I_SET', '300'),
                                   ('RAMP_UP_SET', '200')]:
-                proc.stdin.write(f'dbpf TEST:N1410:FC1:HV_{suffix} {value}\n')
+                subsystem = 'POSITIVE' if suffix == 'I_SET' else 'PHV'
+                proc.stdin.write(f'dbpf TEST:N1410:FC1:{subsystem}:{suffix} {value}\n')
                 proc.stdin.flush()
                 time.sleep(0.2)
             for fragment in ['PAR:VSET,VAL:123.46', 'PAR:ISET,VAL:0.015',
                              'PAR:RUP,VAL:25', 'PAR:RDW,VAL:30', 'PAR:ON', 'PAR:OFF',
-                             'PAR:VSET,VAL:1000.00', 'PAR:ISET,VAL:200.000', 'PAR:RUP,VAL:100']:
+                             'PAR:VSET,VAL:500.00', 'PAR:ISET,VAL:200.000', 'PAR:RUP,VAL:100']:
                 assert any('CMD:SET' in c and fragment in c for c in commands), (fragment, commands)
             reject.set()
-            proc.stdin.write('dbpf TEST:N1410:FC1:HV_V_SET 100\n')
+            proc.stdin.write('dbpf TEST:N1410:FC1:PHV:V_SET 100\n')
             proc.stdin.flush()
             time.sleep(0.3)
-            proc.stdin.write('dbgf TEST:N1410:FC1:HV_V_SET.SEVR\nexit\n')
+            proc.stdin.write('dbgf TEST:N1410:FC1:POSITIVE:V_SET.SEVR\nexit\n')
             proc.stdin.flush()
             proc.wait(timeout=10)
         text = log.read_text()

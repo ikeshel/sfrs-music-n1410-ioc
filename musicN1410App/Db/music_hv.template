@@ -10,7 +10,7 @@
 # VMAX   maximum voltage accepted through EPICS, volts
 # IMAX   maximum current limit accepted through EPICS, microamperes
 
-record(bo, "$(P)FC$(FC):HV_ENABLE")
+record(bo, "$(P)FC$(FC):PHV:ENABLE")
 {
     field(DESC, "HV output enable")
     field(DTYP, "stream")
@@ -22,22 +22,16 @@ record(bo, "$(P)FC$(FC):HV_ENABLE")
     # Never automatically energize HV when the IOC starts.
     field(PINI, "NO")
 }
-alias ($(P)FC$(FC):HV_ENABLE, $(P)FC$(FC):HV_ENABL)
-alias ($(P)FC$(FC):HV_ENABLE, $(P)FC$(FC):HV_ON_OFF)
-alias ($(P)FC$(FC):HV_ENABLE, $(P)FC$(FC):HV_ON)
-alias ($(P)FC$(FC):HV_ENABLE, $(P)FC$(FC):HV_OFF)
 
-record(longin, "$(P)FC$(FC):HV_STATUS")
+record(longin, "$(P)FC$(FC):PHV:STATUS")
 {
     field(DESC, "Raw CAEN status bitmask")
     field(DTYP, "stream")
     field(INP,  "@caen_n1410.proto getStatus($(BD),$(CH)) $(PORT)")
     field(SCAN, "1 second")
 }
-alias ($(P)FC$(FC):HV_STATUS, $(P)FC$(FC):HV_STATE)
-alias ($(P)FC$(FC):HV_STATUS, $(P)FC$(FC):HV_STAT)
 
-record(ao, "$(P)FC$(FC):HV_V_SET")
+record(ao, "$(P)FC$(FC):PHV:V_SET")
 {
     field(DESC, "HV voltage setpoint")
     field(DTYP, "stream")
@@ -52,7 +46,7 @@ record(ao, "$(P)FC$(FC):HV_V_SET")
     field(PINI, "NO")
 }
 
-record(ai, "$(P)FC$(FC):HV_V_RBV")
+record(ai, "$(P)FC$(FC):PHV:V_RBV")
 {
     field(DESC, "Measured HV voltage")
     field(DTYP, "stream")
@@ -64,7 +58,7 @@ record(ai, "$(P)FC$(FC):HV_V_RBV")
     field(LOPR, "-1")
 }
 
-record(ao, "$(P)FC$(FC):HV_I_SET")
+record(ao, "$(P)FC$(FC):PHV:I_SET")
 {
     field(DESC, "HV current-limit setpoint")
     field(DTYP, "stream")
@@ -79,7 +73,7 @@ record(ao, "$(P)FC$(FC):HV_I_SET")
     field(PINI, "NO")
 }
 
-record(ai, "$(P)FC$(FC):HV_I_RBV")
+record(ai, "$(P)FC$(FC):PHV:I_RBV")
 {
     field(DESC, "Measured HV current")
     field(DTYP, "stream")
@@ -91,7 +85,7 @@ record(ai, "$(P)FC$(FC):HV_I_RBV")
     field(LOPR, "-1")
 }
 
-record(ao, "$(P)FC$(FC):HV_RAMP_UP_SET")
+record(ao, "$(P)FC$(FC):PHV:RAMP_UP_SET")
 {
     field(DESC, "HV ramp-up speed")
     field(DTYP, "stream")
@@ -107,7 +101,7 @@ record(ao, "$(P)FC$(FC):HV_RAMP_UP_SET")
     field(PINI, "NO")
 }
 
-record(ao, "$(P)FC$(FC):HV_RAMP_DOWN_SET")
+record(ao, "$(P)FC$(FC):PHV:RAMP_DOWN_SET")
 {
     field(DESC, "HV ramp-down speed")
     field(DTYP, "stream")
@@ -122,3 +116,13 @@ record(ao, "$(P)FC$(FC):HV_RAMP_DOWN_SET")
 
     field(PINI, "NO")
 }
+
+# Readable polarity aliases; each name refers to the same EPICS record.
+alias("$(P)FC$(FC):PHV:ENABLE", "$(P)FC$(FC):POSITIVE:ENABLE")
+alias("$(P)FC$(FC):PHV:STATUS", "$(P)FC$(FC):POSITIVE:STATUS")
+alias("$(P)FC$(FC):PHV:V_SET", "$(P)FC$(FC):POSITIVE:V_SET")
+alias("$(P)FC$(FC):PHV:V_RBV", "$(P)FC$(FC):POSITIVE:V_RBV")
+alias("$(P)FC$(FC):PHV:I_SET", "$(P)FC$(FC):POSITIVE:I_SET")
+alias("$(P)FC$(FC):PHV:I_RBV", "$(P)FC$(FC):POSITIVE:I_RBV")
+alias("$(P)FC$(FC):PHV:RAMP_UP_SET", "$(P)FC$(FC):POSITIVE:RAMP_UP_SET")
+alias("$(P)FC$(FC):PHV:RAMP_DOWN_SET", "$(P)FC$(FC):POSITIVE:RAMP_DOWN_SET")
