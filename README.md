@@ -168,3 +168,13 @@ Update clients from `FC1:HV_V_RBV` to `FC1:PHV:V_RBV` and from
 so the positive and negative IOCs can share the MUSIC prefix without collisions.
 Rebuild and restart both IOCs to load the new names. This naming change does
 not alter hardware polarity or the protocol's voltage sign convention.
+
+### Host-specific USB devices
+
+`run.sh` selects FTDI serial `AB0OC33T` on `x86l-260` (case-insensitive).
+The fallback remains `AB0OC33S`, the device used on `dtlpc019`.
+Set `CAEN_DEVICE` explicitly for other adapters; an explicit value always wins.
+Device selection follows the hostname independently of `PV_LOCATION`. The CAEN
+`ttyACM` device belongs to the separate NDT1470 IOC.
+Direct `st.cmd` startup does not perform this hostname selection; supply
+`CAEN_DEVICE` explicitly when bypassing `run.sh` on `x86l-260`.

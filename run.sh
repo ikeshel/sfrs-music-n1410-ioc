@@ -3,8 +3,9 @@ set -euo pipefail
 ioc_root=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ioc_arch=${EPICS_HOST_ARCH:-linux-x86_64}
 ioc_binary="$ioc_root/bin/$ioc_arch/musicN1410"
+ioc_hostname=$(hostname -s | tr '[:upper:]' '[:lower:]')
 if [[ -z ${PV_LOCATION:-} ]]; then
-    case "$(hostname -s | tr '[:upper:]' '[:lower:]')" in
+    case "$ioc_hostname" in
         x86l-260) export PV_LOCATION=FMF1 ;;
         x86l-261) export PV_LOCATION=FHF1 ;;
         *) echo 'Set PV_LOCATION=FHF1 or FMF1 for this host.' >&2; exit 1 ;;
@@ -13,7 +14,12 @@ fi
 case "$PV_LOCATION" in FHF1|FMF1) ;; *) echo 'PV_LOCATION must be FHF1 or FMF1.' >&2; exit 1 ;; esac
 export MUSIC_PREFIX=${MUSIC_PREFIX:-SFRS:${PV_LOCATION}:MUSIC1:}
 export MUSIC_SUBSTITUTIONS=${MUSIC_SUBSTITUTIONS:-db/music_hv_${PV_LOCATION}.substitutions}
-export CAEN_DEVICE=${CAEN_DEVICE:-/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_AB0OC33S-if00-port0}
+# Each USB adapter has its own serial number; select by host, not PV location.
+case "$ioc_hostname" in
+    x86l-260) caen_serial=AB0OC33T ;;
+    *) caen_serial=AB0OC33S ;;
+esac
+export CAEN_DEVICE=${CAEN_DEVICE:-/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_${caen_serial}-if00-port0}
 export CAEN_BD=${CAEN_BD:-00}
 export HV_V_SET_MAX=${HV_V_SET_MAX:-500}
 export HV_I_SET_MAX=${HV_I_SET_MAX:-200}
