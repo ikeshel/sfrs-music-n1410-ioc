@@ -69,7 +69,7 @@ def check_location(location, channels):
                 time.sleep(0.2)
             for fragment in ['PAR:VSET,VAL:123.46', 'PAR:ISET,VAL:0.015',
                              'PAR:RUP,VAL:25', 'PAR:RDW,VAL:30', 'PAR:ON', 'PAR:OFF',
-                             'PAR:VSET,VAL:500.00', 'PAR:ISET,VAL:200.000', 'PAR:RUP,VAL:100']:
+                             'PAR:VSET,VAL:440.00', 'PAR:ISET,VAL:200.000', 'PAR:RUP,VAL:100']:
                 assert any('CMD:SET' in c and fragment in c for c in commands), (fragment, commands)
             reject.set()
             proc.stdin.write('dbpf TEST:N1410:FC1:PHV:V_SET 100\n')

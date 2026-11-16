@@ -52,7 +52,7 @@ added to a substitutions file. The template supports all four hardware channels.
 ```bash
 PV_LOCATION=FHF1 \
 CAEN_DEVICE=/dev/serial/by-id/YOUR_N1410_DEVICE \
-HV_V_SET_MAX=500 HV_I_SET_MAX=120 ./run.sh
+HV_V_SET_MAX=440 HV_I_SET_MAX=120 ./run.sh
 ```
 
 Choose the correct device with `ls -l /dev/serial/by-id/`. The default for the supplied installation is
@@ -72,12 +72,12 @@ overrides:
 | `CAEN_PORT` | `MUSIC_N1410` |
 | `CAEN_BD` | `00` (two digits, 00–31) |
 | `CAEN_BAUD` | `9600`; 8N1, XON/XOFF |
-| `HV_V_SET_MAX` | `500` V (positive operating limit) |
+| `HV_V_SET_MAX` | `440` V (positive operating limit) |
 | `HV_I_SET_MAX` | `200` µA; lower to ≤20 with Imon Zoom |
 | `EPICS_CAS_SERVER_PORT` | `5064` |
 
 Set voltage/current limits to the approved detector operating envelope. The
-launcher rejects voltage limits above 500 V and current limits above 200 µA, invalid addresses and missing
+launcher rejects voltage limits above 440 V and current limits above 200 µA, invalid addresses and missing
 devices. Direct startup bypasses launcher validation:
 
 ```bash
@@ -178,3 +178,12 @@ Device selection follows the hostname independently of `PV_LOCATION`. The CAEN
 `ttyACM` device belongs to the separate NDT1470 IOC.
 Direct `st.cmd` startup does not perform this hostname selection; supply
 `CAEN_DEVICE` explicitly when bypassing `run.sh` on `x86l-260`.
+
+### Operating settings (2026-11-16)
+
+The PHV operating ceiling is +440 V with a 200 µA current limit and
+50 V/s ramp-up and ramp-down. Across a total 2.2 MΩ load, 440 V requires
+200 µA ideally, leaving no current margin for tolerances or leakage.
+Current and ramp setpoints are set on the hardware and read at IOC startup;
+the IOC does not automatically overwrite them. The voltage ceiling is an
+EPICS software limit, separate from the module's hardware VMAX.
