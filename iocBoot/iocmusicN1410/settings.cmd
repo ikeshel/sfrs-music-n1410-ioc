@@ -1,3 +1,9 @@
+
+#
+# i.keshelashvili@gsi.de
+#
+# FMF1 or FHF1, Positive HV MUSIC1 installation settings
+
 # N1410 installation settings. Environment overrides are supported.
 epicsEnvSet("PV_LOCATION", "$(PV_LOCATION=FHF1)")
 epicsEnvSet("MUSIC_PREFIX", "$(MUSIC_PREFIX=SFRS:$(PV_LOCATION):MUSIC1:)")

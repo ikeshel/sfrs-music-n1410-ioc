@@ -23,7 +23,7 @@ export CAEN_DEVICE=${CAEN_DEVICE:-/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_${c
 export CAEN_BD=${CAEN_BD:-00}
 export HV_V_SET_MAX=${HV_V_SET_MAX:-440}
 export HV_I_SET_MAX=${HV_I_SET_MAX:-200}
-export EPICS_CAS_SERVER_PORT=${EPICS_CAS_SERVER_PORT:-5064}
+export EPICS_CAS_SERVER_PORT=${EPICS_CAS_SERVER_PORT:-5066}
 # Catch configuration mistakes before opening a hardware connection.
 python3 - <<'PY'
 import os, re
